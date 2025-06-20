@@ -1,8 +1,8 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using JobApplicationApi.Models;
-using JobApplicationApi.Repositories;
 using JobApplicationApi.DTO;
+using JobApplicationApi.Models;
+using JobApplicationApi.Service;
 
 namespace JobApplicationApi.Controllers
 {
@@ -10,43 +10,18 @@ namespace JobApplicationApi.Controllers
     [ApiController]
     public class ApplicationsController : ControllerBase
     {
-        private readonly IApplicationRepository _repository;
+        private readonly IApplicationService _service;
 
-        public ApplicationsController(IApplicationRepository repository)
+        public ApplicationsController(IApplicationService service)
         {
-            _repository = repository;
+            _service = service;
         }
 
         // GET: api/applications
         [HttpGet]
-        public async Task<ActionResult<PaginatedDTO<JobApplication>>> GetApplications(int? page, int? size, string? sortBy, string? sortDesc, string? status)
+        public async Task<ActionResult<PaginationContentDTO<JobApplication>>> GetApplications(int? page, int? size, string? sortBy, string? sortDesc, string? status)
         {
-            int pageNumber = page ?? 1;
-            int pageSize = size ?? 10;
-            string sort = sortBy ?? "dateApplied";
-            string order = sortDesc == "true" ? "desc" : "asc";
-            string[] statuses = status == null ? [] : status.Split(',');
-            
-            var applications = await _repository.GetAll(pageNumber, pageSize, sort, order, statuses);
-            var totalElements = await _repository.Count(statuses);
-            var totalPages = (int)Math.Ceiling((double)totalElements / pageSize);
-            bool first = pageNumber == 1;
-            bool last = pageNumber >= totalPages;
-
-            var response = new PaginatedDTO<JobApplication>
-            {
-                content =  applications,
-                pagination = new PaginationDTO
-                {
-                    page = pageNumber,
-                    size = pageSize,
-                    totalElements = totalElements,
-                    totalPages = totalPages,
-                    first = pageNumber == 1,
-                    last = pageNumber >= totalPages
-                }
-            };
-
+            var response = await _service.GetApplications(page, size, sortBy, sortDesc, status);
             return Ok(response);
         }
 
@@ -54,7 +29,7 @@ namespace JobApplicationApi.Controllers
         [HttpGet("{id}")]
         public async Task<ActionResult<JobApplication>> GetApplication(int id)
         {
-            var jobApplication = await _repository.Get(id);
+            var jobApplication = await _service.GetApplication(id);
 
             if (jobApplication == null)
             {
@@ -75,11 +50,11 @@ namespace JobApplicationApi.Controllers
 
             try
             {
-                await _repository.Put(id, jobApplication);
+                await _service.UpdateApplication(id, jobApplication);
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!JobApplicationExists(id))
+                if (!_service.JobApplicationExists(id))
                 {
                     return NotFound();
                 }
@@ -96,13 +71,8 @@ namespace JobApplicationApi.Controllers
         [HttpPost]
         public async Task<ActionResult<JobApplication>> AddApplication(JobApplication jobApplication)
         {
-            await _repository.Post(jobApplication);
-            return CreatedAtAction("GetJobApplication", new { id = jobApplication.id }, jobApplication);
-        }
-
-        private bool JobApplicationExists(int id)
-        {
-            return _repository.Exists(id);
+            var newApplication = await _service.AddApplication(jobApplication);
+            return CreatedAtAction(nameof(GetApplication), new { id = newApplication.id }, newApplication);
         }
     }
 }
