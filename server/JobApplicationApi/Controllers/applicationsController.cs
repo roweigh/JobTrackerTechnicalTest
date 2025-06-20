@@ -1,13 +1,8 @@
-﻿using JobApplicationApi.Models;
-using JobApplicationApi.Repositories;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using System;
-using System.Collections.Generic;
-using System.Drawing.Printing;
-using System.Linq;
-using System.Threading.Tasks;
+using JobApplicationApi.Models;
+using JobApplicationApi.Repositories;
+using JobApplicationApi.DTO;
 
 namespace JobApplicationApi.Controllers
 {
@@ -24,27 +19,35 @@ namespace JobApplicationApi.Controllers
 
         // GET: api/applications
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<JobApplication>>> GetJobApplication(int? page, int? size)
+        public async Task<ActionResult<PaginatedDTO<JobApplication>>> GetJobApplication(int? page, int? size, string? sortBy, string? sortDesc, string? status)
         {
             int pageNumber = page ?? 1;
             int pageSize = size ?? 10;
+            string sort = sortBy ?? "dateApplied";
+            string order = sortDesc == "true" ? "desc" : "asc";
+            string[] statuses = status == null ? [] : status.Split(',');
             
-            var applications = await _repository.GetAll(pageNumber, pageSize);
-            var totalElements = await _repository.Count();
-            var totalPages = Math.Ceiling((double)totalElements / pageSize);
+            var applications = await _repository.GetAll(pageNumber, pageSize, sort, order, statuses);
+            var totalElements = await _repository.Count(statuses);
+            var totalPages = (int)Math.Ceiling((double)totalElements / pageSize);
             bool first = pageNumber == 1;
             bool last = pageNumber >= totalPages;
 
-            return Ok(new
+            var response = new PaginatedDTO<JobApplication>
             {
-                content = applications,
-                page = pageNumber,
-                size = pageSize,
-                totalElements,
-                totalPages,
-                first,
-                last
-            });
+                content =  applications,
+                pagination = new PaginationDTO
+                {
+                    page = pageNumber,
+                    size = pageSize,
+                    totalElements = totalElements,
+                    totalPages = totalPages,
+                    first = pageNumber == 1,
+                    last = pageNumber >= totalPages
+                }
+            };
+
+            return Ok(response);
         }
 
         // GET: api/applications/5

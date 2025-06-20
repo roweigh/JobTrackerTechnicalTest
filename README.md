@@ -46,6 +46,3 @@ Open [http://localhost:3000](http://localhost:3000) with your browser.
 ## Possible further improvements
 #### SQLite implementation
 In the interest of time, I decided to use the in-memory DB approach to my backend, opting to try the SQLite implementation approach if I had spare time afterwards. 
-
-#### Sorting/Filtering
-I have sorted the applications by 'Date Applied' in reverse chronological order, as I find it to be a poor user experience to navigate to the end of the table to view a newly added application (even after implementing a button to paginate to the end). I have yet to implement interactable columns to allow for column sorting, but being able to filter/sort on 'Status' would be a large improvement to this project from a usability standpoint.

@@ -1,8 +1,10 @@
-import React from 'react';
+import React, { SetStateAction } from 'react';
 import { useMemo } from 'react';
 import { Pagination } from '@/api/applications';
 import {
   ColumnDef,
+  ColumnFiltersState,
+  SortingState,
   flexRender,
   getCoreRowModel,
   useReactTable
@@ -35,8 +37,12 @@ interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[];
   data: TData[];
   pagination: Pagination;
-  setPagination: (pagination: Pagination) => void;
+  sorting: SortingState,
+  columnFilters: ColumnFiltersState,
   setEdit: (row: TData) => void;
+  onPagination: (pagination: Pagination) => void;
+  onSortingChange: (updater: SetStateAction<SortingState>) => void;
+  onColumnFiltersChange: (updater: SetStateAction<ColumnFiltersState>) => void;
 }
 
 /**
@@ -46,20 +52,31 @@ interface DataTableProps<TData, TValue> {
 export default function DataTable<TData, TValue>({
   columns,
   data,
+  setEdit,
   pagination,
-  setPagination,
-  setEdit
+  onPagination,
+  sorting,
+  onSortingChange,
+  columnFilters,
+  onColumnFiltersChange
 }: DataTableProps<TData, TValue>) {
   const table = useReactTable({
     data,
     columns,
+    onSortingChange,
+    onColumnFiltersChange,
     getCoreRowModel: getCoreRowModel(),
-    manualPagination: true
+    manualPagination: true,
+    manualFiltering: true,
+    state: {
+      sorting,
+      columnFilters
+    }
   });
 
   return (
     <div>
-      <TablePagination pagination={pagination} setPagination={setPagination} />
+      <TablePagination pagination={pagination} onPagination={onPagination} />
 
       <div className="rounded-md border my-2">
         <Table>
@@ -67,10 +84,9 @@ export default function DataTable<TData, TValue>({
             {table.getHeaderGroups().map(headerGroup => (
               <TableRow key={headerGroup.id}>
                 {headerGroup.headers.map(header => {
-                  // Set the actions column to width of text
                   let className = '';
                   if (header.id === 'actions') {
-                    className = 'w-[60px]';
+                    className = 'text-center';
                   }
 
                   return (
@@ -111,7 +127,7 @@ export default function DataTable<TData, TValue>({
                       );
                     } else {
                       return (
-                        <TableCell key={cell.id}>
+                        <TableCell key={cell.id} className="px-[20px]">
                           {flexRender(
                             cell.column.columnDef.cell,
                             cell.getContext()
@@ -136,7 +152,7 @@ export default function DataTable<TData, TValue>({
         </Table>
       </div>
 
-      <TablePagination pagination={pagination} setPagination={setPagination} />
+      <TablePagination pagination={pagination} onPagination={onPagination} />
     </div>
   );
 }
@@ -146,10 +162,10 @@ export default function DataTable<TData, TValue>({
  */
 function TablePagination({
   pagination,
-  setPagination
+  onPagination
 }: {
   pagination: Pagination;
-  setPagination: (v: Pagination) => void;
+  onPagination: (v: Pagination) => void;
 }) {
   const lowerBound = useMemo(() => {
     const result = (pagination.page - 1) * pagination.size + 1;
@@ -177,15 +193,15 @@ function TablePagination({
         <Select
           value={`${pagination.size}`}
           onValueChange={e => {
-            setPagination({ ...pagination, page: 1, size: Number(e) });
+            onPagination({ ...pagination, page: 1, size: Number(e) });
           }}
         >
-          <SelectTrigger className="h-8 w-[70px]">
+          <SelectTrigger className="h-8 w-[70px] cursor-pointer">
             <SelectValue placeholder={pagination.size} />
           </SelectTrigger>
           <SelectContent side="top">
             {[10, 20, 25, 30, 40, 50].map(pageSize => (
-              <SelectItem key={pageSize} value={`${pageSize}`}>
+              <SelectItem key={pageSize} value={`${pageSize}`} className="cursor-pointer">
                 {pageSize}
               </SelectItem>
             ))}
@@ -201,9 +217,9 @@ function TablePagination({
       <Button
         variant="ghost"
         size="icon"
-        className="hidden size-8 lg:flex"
+        className="hidden size-8 lg:flex cursor-pointer"
         onClick={() => {
-          setPagination({ ...pagination, page: 1 });
+          onPagination({ ...pagination, page: 1 });
         }}
         disabled={pagination.first}
       >
@@ -212,9 +228,9 @@ function TablePagination({
       <Button
         variant="ghost"
         size="icon"
-        className="size-8"
+        className="size-8 cursor-pointer"
         onClick={() => {
-          setPagination({ ...pagination, page: pagination.page - 1 });
+          onPagination({ ...pagination, page: pagination.page - 1 });
         }}
         disabled={pagination.first}
       >
@@ -223,9 +239,9 @@ function TablePagination({
       <Button
         variant="ghost"
         size="icon"
-        className="size-8"
+        className="size-8 cursor-pointer"
         onClick={() => {
-          setPagination({ ...pagination, page: pagination.page + 1 });
+          onPagination({ ...pagination, page: pagination.page + 1 });
         }}
         disabled={pagination.last}
       >
@@ -234,9 +250,9 @@ function TablePagination({
       <Button
         variant="ghost"
         size="icon"
-        className="hidden size-8 lg:flex"
+        className="hidden size-8 lg:flex cursor-pointer"
         onClick={() => {
-          setPagination({ ...pagination, page: pagination.totalPages });
+          onPagination({ ...pagination, page: pagination.totalPages });
         }}
         disabled={pagination.last}
       >

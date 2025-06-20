@@ -1,28 +1,155 @@
 import React from 'react';
 import { ColumnDef } from '@tanstack/react-table';
-import { Badge } from '@/components/ui/badge';
 import { Application } from '@/api/applications';
+
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import {
+  HoverCard,
+  HoverCardContent,
+  HoverCardTrigger
+} from '@/components/ui/hover-card';
+
+import {
+  Funnel,
+  ChevronUp,
+  ChevronDown,
+  ChevronsUpDown
+} from 'lucide-react';
 
 // Define table columns
 export const columns: ColumnDef<Application>[] = [
   {
     accessorKey: 'companyName',
-    header: 'Company Name'
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          className="cursor-pointer"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Company Name
+          {column.getIsSorted() === 'asc' ? (
+            <ChevronUp />
+          ) : column.getIsSorted() === 'desc' ? (
+            <ChevronDown />
+          ) : (
+            <ChevronsUpDown className="opacity-[0.4]" />
+          )}
+        </Button>
+      );
+    }
   },
   {
     accessorKey: 'position',
-    header: 'Position'
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          className="cursor-pointer"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Position
+          {column.getIsSorted() === 'asc' ? (
+            <ChevronUp />
+          ) : column.getIsSorted() === 'desc' ? (
+            <ChevronDown />
+          ) : (
+            <ChevronsUpDown className="opacity-[0.4]" />
+          )}
+        </Button>
+      );
+    }
   },
   {
     accessorKey: 'status',
-    header: 'Status',
+    header: ({ column }) => {
+      const filterValue = column.getFilterValue() as string[] | undefined;
+      const filterSet = new Set(filterValue ?? []);
+      
+      return (
+        <HoverCard 
+          openDelay={200}
+          closeDelay={200}
+        >
+          <HoverCardTrigger>
+            <div className={'text-center'}>
+              <Button
+                variant="ghost"
+                className="cursor-pointer"
+                onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+              >
+                {filterSet.size > 0 ? (
+                  <Funnel />
+                ) : (
+                  <Funnel className="opacity-[0.4]"/>
+                )}
+
+                Status
+
+                {column.getIsSorted() === 'asc' ? (
+                  <ChevronUp />
+                ) : column.getIsSorted() === 'desc' ? (
+                  <ChevronDown />
+                ) : (
+                  <ChevronsUpDown className="opacity-[0.4]" />
+                )}
+              </Button>
+            </div>
+          </HoverCardTrigger>
+          <HoverCardContent 
+            sideOffset={10}
+            align={'start'} className="flex flex-col gap-[16px]">
+            {['Applied', 'Interview', 'Offer', 'Rejected'].map(value => (
+              <div key={value} className="flex gap-[8px]">
+                <Checkbox 
+                  checked={filterSet.has(value)}
+                  onCheckedChange={(v) => {
+                    if (v) {
+                      filterSet.add(value);
+                    } else {
+                      filterSet.delete(value);
+                    }
+                    column.setFilterValue([...filterSet]);
+                  }}
+                />
+                <Label>{value}</Label>
+              </div>
+            ))}
+          </HoverCardContent>
+        </HoverCard>
+      );
+    },
     cell: ({ row }) => {
-      return <Status status={row.original.status} />;
+      return (
+        <div className="text-center">
+          <Status status={row.original.status} />
+        </div>
+      );
     }
   },
   {
     accessorKey: 'dateApplied',
-    header: 'Date Applied',
+    header: ({ column }) => {
+      return (
+        <Button
+          variant="ghost"
+          className="cursor-pointer"
+          onClick={() => column.toggleSorting(column.getIsSorted() === 'asc')}
+        >
+          Date Applied
+          {column.getIsSorted() === 'asc' ? (
+            <ChevronUp />
+          ) : column.getIsSorted() === 'desc' ? (
+            <ChevronDown />
+          ) : (
+            <ChevronsUpDown className="opacity-[0.4]" />
+          )}
+        </Button>
+      );
+    },
     cell: ({ row }) => {
       return <span>{generateDateTime(row.original.dateApplied)}</span>;
     }
