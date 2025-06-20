@@ -8,7 +8,7 @@ namespace JobApplicationApi.Service
     {
         private readonly IApplicationRepository _repository = repository;
 
-        public async Task<PaginationContentDTO<JobApplicationDTO>> GetApplications(int? page, int? size, string? sortBy, string? sortDesc, string? status)
+        public async Task<PaginationContentDTO<ApplicationDTO>> GetApplications(int? page, int? size, string? sortBy, string? sortDesc, string? status)
         {
             // Generate default values
             int pageNumber = page ?? 1;
@@ -16,12 +16,7 @@ namespace JobApplicationApi.Service
             string key = sortBy ?? "dateApplied";
             string order = sortDesc == "true" ? "desc" : "asc";
             string[] statuses = string.IsNullOrEmpty(status) ? [] : status.Split(',');
-
             var applications = await _repository.GetAll();
-            var totalElements = applications.Count();
-            var totalPages = (int)Math.Ceiling((double)totalElements / pageSize);
-            var first = pageNumber == 1;
-            var last = pageNumber >= totalPages;
 
             // Filter items
             if (statuses.Any())
@@ -29,6 +24,13 @@ namespace JobApplicationApi.Service
                 applications = applications.Where(item => statuses.Contains(item.status));
             }
 
+            //  Generate pagination data after filtering
+            var totalElements = applications.Count();
+            var totalPages = (int)Math.Ceiling((double)totalElements / pageSize);
+            var first = pageNumber == 1;
+            var last = pageNumber >= totalPages;
+
+            // Order items
             switch (key)
             {
                 case "companyName":
@@ -51,7 +53,7 @@ namespace JobApplicationApi.Service
             var content = applications
                 .Skip((pageNumber - 1) * pageSize)
                 .Take(pageSize)
-                .Select(JobApplicationMapper.ToDTO)
+                .Select(ApplicationMapper.ToDTO)
                 .ToList();
 
             var pagination = new PaginationDTO
@@ -64,28 +66,28 @@ namespace JobApplicationApi.Service
                 last = last
             };
 
-            return new PaginationContentDTO<JobApplicationDTO>
+            return new PaginationContentDTO<ApplicationDTO>
             {
                 content = content,
                 pagination = pagination
             };
         }
 
-        public async Task<JobApplicationDTO> GetApplication(int id)
+        public async Task<ApplicationDTO> GetApplication(int id)
         {
             var application = await _repository.Get(id);
-            return JobApplicationMapper.ToDTO(application);
+            return ApplicationMapper.ToDTO(application);
         }
 
-        public async Task UpdateApplication(int id, JobApplicationDTO dto)
+        public async Task UpdateApplication(int id, ApplicationDTO dto)
         {
-            var entity = JobApplicationMapper.ToEntity(dto);
+            var entity = ApplicationMapper.ToEntity(dto);
             await _repository.Put(id, entity);
         }
 
-        public async Task<JobApplication> AddApplication(JobApplicationDTO dto)
+        public async Task<Application> AddApplication(ApplicationDTO dto)
         {
-            var entity = JobApplicationMapper.ToEntity(dto);
+            var entity = ApplicationMapper.ToEntity(dto);
             await _repository.Post(entity);
             return entity;
         }

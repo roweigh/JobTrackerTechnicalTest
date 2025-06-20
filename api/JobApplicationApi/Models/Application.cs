@@ -3,7 +3,7 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 namespace JobApplicationApi.Models
 {
-    public class JobApplication
+    public class Application
     {
         [Key]
         [Required]

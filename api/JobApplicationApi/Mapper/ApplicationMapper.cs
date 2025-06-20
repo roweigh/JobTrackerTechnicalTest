@@ -1,11 +1,11 @@
 ﻿using JobApplicationApi.DTO;
 using JobApplicationApi.Models;
 
-public static class JobApplicationMapper
+public static class ApplicationMapper
 {
-    public static JobApplicationDTO ToDTO(JobApplication application)
+    public static ApplicationDTO ToDTO(Application application)
     {
-        return new JobApplicationDTO
+        return new ApplicationDTO
         {
             id = application.id,
             companyName = application.companyName,
@@ -15,9 +15,9 @@ public static class JobApplicationMapper
         };
     }
 
-    public static JobApplication ToEntity(JobApplicationDTO dto)
+    public static Application ToEntity(ApplicationDTO dto)
     {
-        return new JobApplication
+        return new Application
         {
             id = dto.id,
             companyName = dto.companyName,

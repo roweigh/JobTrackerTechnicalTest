@@ -5,10 +5,10 @@ namespace JobApplicationApi.Service
 {
     public interface IApplicationService
     {
-        Task<PaginationContentDTO<JobApplicationDTO>> GetApplications(int? page, int? size, string? sortBy, string? sortDesc, string? status);
-        Task<JobApplicationDTO> GetApplication(int id);
-        Task UpdateApplication(int id, JobApplicationDTO jobApplication);
-        Task<JobApplication> AddApplication(JobApplicationDTO jobApplication);
+        Task<PaginationContentDTO<ApplicationDTO>> GetApplications(int? page, int? size, string? sortBy, string? sortDesc, string? status);
+        Task<ApplicationDTO> GetApplication(int id);
+        Task UpdateApplication(int id, ApplicationDTO application);
+        Task<Application> AddApplication(ApplicationDTO application);
         bool JobApplicationExists(int id);
     }
 }

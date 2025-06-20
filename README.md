@@ -51,7 +51,6 @@ In the interest of time, I decided to use the in-memory DB approach to my backen
 #### BE
 * Generic error handling should be handled in the middleware pipeline rather than through complex validation logic in the controller. Alternatively, this can be handled in the service/repository layers and propagated up the stack.
 * Would benefit from the addition of a generic exception handler in the middleware as opposed to handling through complex validation logic.
-* Review variable names and enforce consistency.
 
 #### FE
 * Put BE URL in .env file

@@ -1,6 +1,6 @@
 ﻿namespace JobApplicationApi.DTO
 {
-    public class JobApplicationDTO
+    public class ApplicationDTO
     {
         public int id { get; set; }
         public string companyName { get; set; }

@@ -12,26 +12,26 @@ namespace JobApplicationApi.Repositories
             _context = context;
         }
 
-        public async Task<IEnumerable<JobApplication>> GetAll()
+        public async Task<IEnumerable<Application>> GetAll()
         {
-            IQueryable<JobApplication> items = _context.JobApplication;
+            IQueryable<Application> items = _context.JobApplication;
             return await Task.FromResult(items);
         }
 
-        public async Task<JobApplication> Get(int id)
+        public async Task<Application> Get(int id)
         {
             return await _context.JobApplication.FindAsync(id);
         }
 
-        public async Task Post(JobApplication jobApplication)
+        public async Task Post(Application application)
         {
-            _context.JobApplication.Add(jobApplication);
+            _context.JobApplication.Add(application);
             await _context.SaveChangesAsync();
         }
 
-        public async Task Put(int id, JobApplication jobApplication)
+        public async Task Put(int id, Application application)
         {
-            _context.Entry(jobApplication).State = EntityState.Modified;
+            _context.Entry(application).State = EntityState.Modified;
             await _context.SaveChangesAsync();
         }
 
