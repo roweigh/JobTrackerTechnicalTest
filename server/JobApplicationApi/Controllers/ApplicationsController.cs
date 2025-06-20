@@ -27,7 +27,7 @@ namespace JobApplicationApi.Controllers
 
         // GET: api/applications/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<JobApplication>> GetApplication(int id)
+        public async Task<ActionResult<JobApplicationDTO>> GetApplication(int id)
         {
             var jobApplication = await _service.GetApplication(id);
 
@@ -50,7 +50,7 @@ namespace JobApplicationApi.Controllers
 
             try
             {
-                await _service.UpdateApplication(id, jobApplication);
+                await _service.UpdateApplication(id, JobApplicationMapper.ToDTO(jobApplication));
             }
             catch (DbUpdateConcurrencyException)
             {
@@ -71,7 +71,7 @@ namespace JobApplicationApi.Controllers
         [HttpPost]
         public async Task<ActionResult<JobApplication>> AddApplication(JobApplication jobApplication)
         {
-            var newApplication = await _service.AddApplication(jobApplication);
+            var newApplication = await _service.AddApplication(JobApplicationMapper.ToDTO(jobApplication));
             return CreatedAtAction(nameof(GetApplication), new { id = newApplication.id }, newApplication);
         }
     }
