@@ -19,16 +19,9 @@ namespace JobApplicationApi.Controllers
 
         // GET: api/applications
         [HttpGet]
-        public async Task<ActionResult<PaginatedDTO<JobApplication>>> GetApplications(int? page, int? size, string? sortBy, string? sortDesc, string? status)
+        public async Task<ActionResult<PaginationContentDTO<JobApplication>>> GetApplications(int? page, int? size, string? sortBy, string? sortDesc, string? status)
         {
-            // Generate default values
-            int pageNumber = page ?? 1;
-            int pageSize = size ?? 10;
-            string key = sortBy ?? "dateApplied";
-            string order = sortDesc == "true" ? "desc" : "asc";
-            string[] statuses = string.IsNullOrEmpty(status) ? [] : status.Split(',');
-
-            var response = await _service.GetApplications(pageNumber, pageSize, key, order, statuses);
+            var response = await _service.GetApplications(page, size, sortBy, sortDesc, status);
             return Ok(response);
         }
 

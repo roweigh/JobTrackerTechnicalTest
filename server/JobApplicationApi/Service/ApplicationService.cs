@@ -8,23 +8,31 @@ namespace JobApplicationApi.Service
     {
         private readonly IApplicationRepository _repository = repository;
 
-        public async Task<PaginatedDTO<JobApplication>> GetApplications(int page, int size, string sortBy, string order, string[] statuses)
+        public async Task<PaginationContentDTO<JobApplication>> GetApplications(int? page, int? size, string? sortBy, string? sortDesc, string? status)
         {
-            var applications = await _repository.GetAll(page, size, sortBy, order, statuses);
-            var totalElements = await _repository.Count(statuses);
-            var totalPages = (int)Math.Ceiling((double)totalElements / size);
+            // Generate default values
+            int pageNumber = page ?? 1;
+            int pageSize = size ?? 10;
+            string key = sortBy ?? "dateApplied";
+            string order = sortDesc == "true" ? "desc" : "asc";
+            string[] statuses = string.IsNullOrEmpty(status) ? [] : status.Split(',');
 
-            return new PaginatedDTO<JobApplication>
+            // Compute pagination data
+            var applications = await _repository.GetAll(pageNumber, pageSize, key, order, statuses);
+            var totalElements = await _repository.Count(statuses);
+            var totalPages = (int)Math.Ceiling((double)totalElements / pageSize);
+
+            return new PaginationContentDTO<JobApplication>
             {
                 content = applications,
                 pagination = new PaginationDTO
                 {
-                    page = page,
-                    size = size,
+                    page = pageNumber,
+                    size = pageSize,
                     totalElements = totalElements,
                     totalPages = totalPages,
-                    first = page == 1,
-                    last = page >= totalPages
+                    first = pageNumber == 1,
+                    last = pageNumber >= totalPages
                 }
             };
         }
