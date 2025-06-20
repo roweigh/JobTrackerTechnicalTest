@@ -1,5 +1,6 @@
 using JobApplicationApi.Models;
 using JobApplicationApi.Repositories;
+using JobApplicationApi.Service;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,6 +11,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddCors();
 builder.Services.AddScoped<IApplicationRepository, ApplicationRepository>();
+builder.Services.AddScoped<IApplicationService, ApplicationService>();
 
 // DB Injection, using in-memory database
 builder.Services.AddDbContext<AppDBContext>(options =>
