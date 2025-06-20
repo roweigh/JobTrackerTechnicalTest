@@ -17,14 +17,41 @@ namespace JobApplicationApi.Service
             string order = sortDesc == "true" ? "desc" : "asc";
             string[] statuses = string.IsNullOrEmpty(status) ? [] : status.Split(',');
 
-            // Compute pagination data
-            var applications = await _repository.GetAll(pageNumber, pageSize, key, order, statuses);
-            var totalElements = await _repository.Count(statuses);
+            var applications = await _repository.GetAll();
+            var totalElements = applications.Count();
             var totalPages = (int)Math.Ceiling((double)totalElements / pageSize);
+
+            // Filter items
+            if (statuses.Any())
+            {
+                applications = applications.Where(item => statuses.Contains(item.status));
+            }
+
+            switch (key)
+            {
+                case "companyName":
+                    applications = order == "desc" ? applications.OrderByDescending(item => item.companyName) : applications.OrderBy(item => item.companyName);
+                    break;
+                case "position":
+                    applications = order == "desc" ? applications.OrderByDescending(item => item.position) : applications.OrderBy(item => item.position);
+                    break;
+                case "status":
+                    applications = order == "desc" ? applications.OrderByDescending(item => item.status) : applications.OrderBy(item => item.status);
+                    break;
+                case "dateApplied":
+                    applications = order == "desc" ? applications.OrderByDescending(item => item.dateApplied) : applications.OrderBy(item => item.dateApplied);
+                    break;
+                default:
+                    applications = applications.OrderByDescending(item => item.dateApplied);
+                    break;
+            }
 
             return new PaginationContentDTO<JobApplication>
             {
-                content = applications,
+                content = applications
+                    .Skip((pageNumber - 1) * pageSize)
+                    .Take(pageSize)
+                    .ToList(),
                 pagination = new PaginationDTO
                 {
                     page = pageNumber,
@@ -36,6 +63,7 @@ namespace JobApplicationApi.Service
                 }
             };
         }
+
         public async Task<JobApplication> GetApplication(int id)
         {
             return await _repository.Get(id);
