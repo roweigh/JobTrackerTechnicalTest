@@ -7,7 +7,7 @@ Tech stack:
 - In-memory DB
 - Swagger
 
-Run the application in /server/JobApplicationAPI with:
+Run the application in /api/JobApplicationAPI with:
 ```bash
 dotnet run
 ```
