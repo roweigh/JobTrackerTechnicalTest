@@ -6,20 +6,20 @@ using JobApplicationApi.DTO;
 
 namespace JobApplicationApi.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/applications")]
     [ApiController]
-    public class applicationsController : ControllerBase
+    public class ApplicationsController : ControllerBase
     {
         private readonly IApplicationRepository _repository;
 
-        public applicationsController(IApplicationRepository repository)
+        public ApplicationsController(IApplicationRepository repository)
         {
             _repository = repository;
         }
 
         // GET: api/applications
         [HttpGet]
-        public async Task<ActionResult<PaginatedDTO<JobApplication>>> GetJobApplication(int? page, int? size, string? sortBy, string? sortDesc, string? status)
+        public async Task<ActionResult<PaginatedDTO<JobApplication>>> GetApplications(int? page, int? size, string? sortBy, string? sortDesc, string? status)
         {
             int pageNumber = page ?? 1;
             int pageSize = size ?? 10;
@@ -52,7 +52,7 @@ namespace JobApplicationApi.Controllers
 
         // GET: api/applications/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<JobApplication>> GetJobApplication(int id)
+        public async Task<ActionResult<JobApplication>> GetApplication(int id)
         {
             var jobApplication = await _repository.Get(id);
 
@@ -66,7 +66,7 @@ namespace JobApplicationApi.Controllers
 
         // PUT: api/applications/5
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutJobApplication(int id, JobApplication jobApplication)
+        public async Task<IActionResult> UpdateApplication(int id, JobApplication jobApplication)
         {
             if (id != jobApplication.id)
             {
@@ -94,7 +94,7 @@ namespace JobApplicationApi.Controllers
 
         // POST: api/applications
         [HttpPost]
-        public async Task<ActionResult<JobApplication>> PostJobApplication(JobApplication jobApplication)
+        public async Task<ActionResult<JobApplication>> AddApplication(JobApplication jobApplication)
         {
             await _repository.Post(jobApplication);
             return CreatedAtAction("GetJobApplication", new { id = jobApplication.id }, jobApplication);
